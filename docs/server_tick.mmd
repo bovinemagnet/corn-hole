@@ -1,0 +1,28 @@
+flowchart TD
+  %% ==========================================
+  %% SERVER TICK PIPELINE (Authoritative)
+  %% ==========================================
+  A[Tick Start\nserverTick++\ncollect inbound InputFrames] --> B[Step 1: Input Ingest\n- take latest input per player\n- clamp/validate ranges\n- drop stale seq frames]
+
+  B --> C[Step 2: Movement Simulation\n(ServerSim)\n- integrate accel/velocity\n- enforce max speed/accel\n- update PlayerState(pos/vel)]
+
+  C --> D[Step 3: Player-vs-Player Resolution\n(BR only)\n- detect overlaps / distances\n- apply kill margin rule\n- choose deterministic winner\n- transfer holeArea/score\n- mark prey eliminated/disconnected]
+
+  D --> E[Step 4: Prop Consumption Candidates\n- spatial query nearby props\n- for each prop, gather eligible players\n- eligibility: radius >= requiredRadius\n  & distance <= innerConsumeRadius]
+
+  E --> F[Step 5: Consume Arbitration\n(ConsumeArbiter)\nFor each propId with >=1 candidate:\n1) smallest distance wins\n2) tie: larger radius wins\n3) tie: lowest playerId wins]
+
+  F --> G[Step 6: Commit Authoritative Outcomes\n- flip consumedSet bit(s)\n- update eater holeArea/score\n- append ObjectConsumed events\n- append PlayerEaten events (from Step 3)]
+
+  G --> H[Step 7: Network Output Build\n- assign monotonic eventSeq\n- batch events for this tick\n- build SnapshotDelta if needed\n  (playersDelta + consumedDelta chunks)]
+
+  H --> I[Step 8: Dispatch\n- send events reliably\n- send deltas (optional)\n- send SnapshotFull on join/reconnect]
+
+  I --> J[Tick End\n- housekeeping\n- disconnect timeouts\n- metrics/log counters]
+
+  %% ==========================================
+  %% NOTES / OPTIONAL BRANCHES
+  %% ==========================================
+  D -. if no BR .-> E
+  H -. if eventSeq gap detected\nor periodic repair .-> K[SnapshotRepair\n- send SnapshotDelta\n- or SnapshotFull fallback]
+  K --> I

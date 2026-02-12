@@ -1,6 +1,11 @@
 # Architecture Overview
 
-This document describes the architecture and design decisions for the Corn Hole multiplayer game.
+This document describes the architecture and design decisions for the **current implementation** of the Corn Hole multiplayer game.
+
+> **Note**: This describes the Phase 0-2 implementation (Host Mode with basic mechanics). For the complete architectural vision including battle royale, dedicated servers, and advanced sync strategies, see:
+> - [docs/arch_overview.md](docs/arch_overview.md) - Full architectural planning
+> - [docs/overview_rules.md](docs/overview_rules.md) - Authoritative event model
+> - [docs/prd-1.md](docs/prd-1.md) - Product requirements and roadmap
 
 ## System Architecture
 
@@ -273,10 +278,16 @@ Uses Fusion's deterministic tick system:
 4. **Interest Management**: Only sync relevant entities
 
 ### Future Scalability (Server Mode)
+
+For the full scalability and migration plan, see [docs/arch_overview.md](docs/arch_overview.md).
+
+**Planned improvements**:
 - Dedicated server can handle 16-32+ players
-- Better cheat prevention
+- Better cheat prevention with server authority
 - Persistent world state
 - Server-authoritative physics
+- Deterministic object spawning (see [docs/consumedSet_sync.md](docs/consumedSet_sync.md))
+- Advanced sync with bitset strategy
 
 ## Security Considerations
 
@@ -285,7 +296,11 @@ Uses Fusion's deterministic tick system:
 - **State Validation**: Minimal (trust client input)
 - **Cheat Prevention**: Limited in Host Mode
 
-### Recommended Improvements
+### Planned Improvements
+
+See [docs/overview_rules.md](docs/overview_rules.md) for the complete authoritative event model.
+
+**Future security model**:
 1. **Server-Side Validation**:
    - Validate movement speed
    - Verify collision events
@@ -338,6 +353,8 @@ CornHole/
 ```
 
 ### File Organization
+
+**Current simple structure** (suitable for Phase 0-2):
 ```
 Assets/
   Scripts/
@@ -351,6 +368,27 @@ Assets/
   UI/
     - UI assets
 ```
+
+**Recommended structure for future phases** (from [docs/folder_structure.md](docs/folder_structure.md)):
+```
+Assets/
+  _Project/
+    Scripts/
+      Core/          - Engine-agnostic utilities
+      Gameplay/      - Pure gameplay logic & rules
+      Presentation/  - VFX/audio/UI view layer
+      Networking/    - Fusion/transport + mapping
+      App/           - Scene flow, bootstrapping
+    Prefabs/
+      Gameplay/
+      Networking/
+    Scenes/
+      Boot/
+      Menu/
+      Game/
+```
+
+This modular structure with assembly definitions keeps netcode and gameplay separated. See [docs/structures.md](docs/structures.md) for complete assembly definition setup.
 
 ## Technology Stack
 
@@ -366,26 +404,54 @@ Assets/
 
 ## Future Architecture Improvements
 
-### Phase 2: Enhanced Gameplay
-- Player vs Player mechanics
-- Power-up system
-- Multiple game modes
-- Leaderboards
+This implementation covers **Phase 0-2** foundations. For the complete phased roadmap, see:
+- [docs/prd-1.md](docs/prd-1.md) - 8-phase development plan
+- [docs/backlog.md](docs/backlog.md) - Detailed user stories per phase
 
-### Phase 3: Server Mode
-- Dedicated server deployment
-- Matchmaking service
-- Session persistence
-- Anti-cheat system
+**Key upcoming features**:
 
-### Phase 4: Scalability
-- Cloud deployment (AWS/Azure)
-- Auto-scaling servers
-- Regional server distribution
-- CDN for asset delivery
+### Phase 3: Shared-World Authoritative Consumption
+- Server-authoritative object consumption
+- Deterministic spawning with shared seed
+- consumedSet bitset synchronization
+- See [docs/consumedSet_sync.md](docs/consumedSet_sync.md)
+
+### Phase 4: Battle Royale (Hole vs Hole)
+- Larger holes consume smaller holes
+- Mass inheritance system
+- Elimination and respawn mechanics
+- See [docs/prd-1.md](docs/prd-1.md) Section 5.4
+
+### Phase 5: Late Join/Reconnect
+- Mid-match joining support
+- State snapshot delivery
+- Reconnection handling
+- See [docs/overview_rules.md](docs/overview_rules.md)
+
+### Phase 6: Dedicated Server Mode
+- Migration from Host to Server Mode
+- Home server deployment (Raspberry Pi)
+- Later: Cloud deployment
+- See [docs/arch_overview.md](docs/arch_overview.md)
+
+### Phase 7-8: Platform Expansion
+- Desktop platforms (Windows/Mac/Linux)
+- Console platforms (Nintendo Switch, PS5)
+- Cross-platform play
 
 ## References
 
+### Implementation Documentation
+- [DEVELOPMENT.md](DEVELOPMENT.md) - Code patterns and conventions
+- [QUICKSTART.md](QUICKSTART.md) - Getting started guide
+- [TROUBLESHOOTING.md](TROUBLESHOOTING.md) - Common issues
+
+### Strategic Documentation
+- [docs/README.md](docs/README.md) - Strategic docs index
+- [docs/prd-1.md](docs/prd-1.md) - Product requirements
+- [docs/arch_overview.md](docs/arch_overview.md) - Full architecture vision
+
+### External Resources
 - [Photon Fusion Documentation](https://doc.photonengine.com/fusion)
 - [Unity Networking Best Practices](https://docs.unity3d.com/)
 - [Game Programming Patterns](https://gameprogrammingpatterns.com/)

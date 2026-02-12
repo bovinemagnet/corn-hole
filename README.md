@@ -2,9 +2,22 @@
 
 A 3D multiplayer game inspired by hole.io, built with Unity and Photon Fusion for real-time networking.
 
+## 📚 Documentation
+
+This project has two complementary documentation sets:
+
+- **Implementation Guides** (this directory): Practical, hands-on guides for building and running the game now
+- **Strategic Planning** ([docs/ folder on main branch](../../tree/main/docs)): Architectural vision, PRD, and long-term roadmap
+
+**New to the project?** Start with [QUICKSTART.md](QUICKSTART.md) for a 25-minute setup guide.
+
+**Want to understand the full vision?** See [docs/prd-1.md](../../blob/main/docs/prd-1.md) and [docs/arch_overview.md](../../blob/main/docs/arch_overview.md) on the main branch.
+
 ## Overview
 
 This is a multiplayer game where players control a hole in the ground that moves around and consumes objects that fall into it. As more objects are consumed, the hole grows bigger, allowing it to eat larger objects and compete with other players.
+
+**Current Implementation**: This PR implements **Phase 0-1** foundations from the project roadmap - basic Host Mode multiplayer with core consumption mechanics. Future phases will add battle royale features, dedicated servers, and advanced networking (see docs/ folder for details).
 
 ## Features
 
@@ -132,6 +145,11 @@ The game uses Photon Fusion in **Host Mode**:
 - Advantages: Easy setup, no dedicated server needed
 - Migration path: Can move to Server Mode later for dedicated servers
 
+For the full architectural vision including battle royale mechanics, dedicated servers, and advanced sync strategies, see:
+- [docs/arch_overview.md](../../blob/main/docs/arch_overview.md) - Complete architectural overview
+- [docs/overview_rules.md](../../blob/main/docs/overview_rules.md) - Authoritative event model
+- [docs/consumedSet_sync.md](../../blob/main/docs/consumedSet_sync.md) - Advanced object sync strategy
+
 ### Key Networking Components
 
 - `NetworkManager`: Handles connection and player spawning
@@ -139,14 +157,25 @@ The game uses Photon Fusion in **Host Mode**:
 - `ConsumableObject`: Synchronized consumable objects
 - RPCs for effects and events
 
-## Future Enhancements
+## Roadmap & Future Enhancements
 
+This implementation covers **Phase 0-1** of the project plan. For the complete roadmap, see:
+- [docs/prd-1.md](../../blob/main/docs/prd-1.md) - Product Requirements Document
+- [docs/backlog.md](../../blob/main/docs/backlog.md) - User stories and acceptance criteria
+- [docs/one-page-checklist](../../blob/main/docs/one-page-checklist) - Phase-by-phase implementation guide
+
+**Planned features** (from strategic docs):
+- [ ] Battle royale: Holes can consume smaller holes and inherit mass
+- [ ] Join-code based matchmaking for private games
+- [ ] Late join and reconnect support
+- [ ] Dedicated server mode (home server → cloud deployment)
+- [ ] Deterministic object spawning with shared seed
+- [ ] Advanced sync with consumedSet bitset strategy
+- [ ] Console platform support (Nintendo Switch, PlayStation 5)
+
+**Near-term enhancements** (implementation level):
 - [ ] Add more object types and variations
-- [ ] Implement player vs player collision mechanics
-- [ ] Add power-ups and special abilities
-- [ ] Create dedicated server mode
-- [ ] Add matchmaking system
-- [ ] Implement leaderboards
+- [ ] Implement power-ups and special abilities
 - [ ] Add sound effects and music
 - [ ] Create visual effects for consuming objects
 - [ ] Add minimap

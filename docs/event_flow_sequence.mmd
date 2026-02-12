@@ -1,0 +1,35 @@
+sequenceDiagram
+  autonumber
+  participant Client as Client
+  participant Server as Server/Host Authority
+
+  %% Join
+  Client->>Server: JoinRequest(joinCode, version, name, reconnectToken?)
+  alt accepted
+    Server-->>Client: JoinAccepted(matchId, playerId, serverTick, reconnectToken)
+    Server-->>Client: SnapshotFull(mapSeed, spawnAlgoVersion,\nplayers[], consumedSet(bitset/chunks), eventSeq, matchPhase)
+    Client->>Client: Spawn props deterministically(mapSeed)\nBuild local objectId mapping
+    Client->>Client: Apply consumedSet -> hide consumed props
+  else rejected
+    Server-->>Client: JoinRejected(reason)
+  end
+
+  %% Play loop
+  loop every tick / fixed rate
+    Client->>Server: InputFrame(seq, moveX, moveY, buttons)
+    Server->>Server: ServerSim applies inputs -> updates PlayerState
+    Server->>Server: ConsumeArbiter checks nearby props\nand resolves contested eats deterministically
+    opt object consumed
+      Server-->>Client: ObjectConsumed(serverTick, eventSeq,\nobjectId, eaterId, eaterAreaAfter, eaterScoreAfter)
+      Client->>Client: Hide prop(objectId)\nPlay local drop/suction FX
+    end
+    opt player eaten (BR)
+      Server-->>Client: PlayerEaten(serverTick, eventSeq,\npredatorId, preyId, predatorAreaAfter,\neliminated=true)
+      Client->>Client: Eliminate prey -> spectate\nUpdate leaderboard
+    end
+  end
+
+  %% Optional repair
+  opt periodic / on request
+    Server-->>Client: SnapshotDelta(serverTick,\nplayersDelta, consumedDeltaIds/chunkBits, eventSeq)
+  end

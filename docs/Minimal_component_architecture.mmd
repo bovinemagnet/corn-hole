@@ -1,0 +1,54 @@
+flowchart LR
+  %% =========================
+  %% CLIENT
+  %% =========================
+  subgraph C[Client (Mobile / Tablet)]
+    UI[UI\n- Join Code\n- Lobby\n- HUD/Leaderboard]
+    IM[InputManager\n- Touch joystick/drag\n- Quantize input]
+    NETC[NetClient\n- Send InputFrame\n- Receive events/snapshots]
+    SIMC[ClientSim (Prediction/Interp)\n- Smooth movement\n- Cosmetic suction]
+    WORLD[WorldSpawner\n- Spawn props from mapSeed\n- Deterministic objectId]
+    CS[ConsumedSet (Local)\n- bitset/chunks\n- hide consumed props]
+    FX[FX Layer\n- Drop tween\n- Particles\n- Audio]
+    PLY[PlayerAvatar\n- Visual hole\n- Camera follow/zoom]
+  end
+
+  %% =========================
+  %% SERVER
+  %% =========================
+  subgraph S[Server / Host Authority]
+    NETS[NetServer\n- Join/leave\n- Dispatch snapshots/events]
+    MATCH[MatchState\n- phase/timer\n- mapSeed/version\n- eventSeq]
+    SIMS[ServerSim\n- Apply inputs\n- Move players\n- Validate max speed]
+    ARB[ConsumeArbiter\n- Determine winner per object\n- Resolve contested eats]
+    PS[PlayerStateStore\n- pos/vel\n- holeArea/score\n- alive/disconnected]
+    SS[ConsumedSet (Authoritative)\n- bitset/chunks\n- objectId truth]
+    SNAP[SnapshotBuilder\n- SnapshotFull/Delta\n- consumedSet sync]
+  end
+
+  %% =========================
+  %% FLOWS
+  %% =========================
+  UI -->|Join code| NETC
+  IM -->|InputFrame| NETC
+  NETC -->|InputFrame stream| NETS
+
+  NETS --> MATCH
+  MATCH --> SNAP
+  NETS -->|SnapshotFull/Delta| NETC
+
+  NETS --> SIMS
+  SIMS --> PS
+  SIMS --> ARB
+  ARB --> SS
+  SS --> SNAP
+
+  NETC --> SIMC
+  NETC -->|ObjectConsumed / PlayerEaten / PhaseChanged| SIMC
+  NETC -->|SnapshotFull applies| WORLD
+  WORLD --> CS
+  CS --> WORLD
+
+  SIMC --> PLY
+  SIMC --> FX
+  WORLD --> FX

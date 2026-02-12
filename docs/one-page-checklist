@@ -1,0 +1,378 @@
+Phase 0 — Foundations + Single-Player Prototype (Feel First)
+Tasks (in order)
+
+Project setup
+
+Unity project (URP or simple built-in; keep it mobile-friendly)
+
+Basic scene: flat ground, bounds, simple lighting
+
+Player hole controller
+
+Hole “visual” (dark circle + rim)
+
+Movement on XZ plane (touch drag or joystick stub)
+
+Smooth accel/decel + max speed
+
+Camera
+
+Top-down follow with damping
+
+Zoom out based on hole radius
+
+Consumables
+
+Spawn ~30–100 props (simple cubes/cylinders)
+
+Each prop has: requiredRadius, value
+
+Consume logic (local)
+
+Two-zone approach: outer detect + inner consume trigger
+
+If eligible: animate drop + hide + add value → grow
+
+Basic match loop
+
+Timer + end screen
+
+Score = total value consumed (or separate score)
+
+Done criteria
+
+You can move smoothly, eat objects, grow, camera zooms correctly
+
+Consumption feels satisfying enough to keep playing for 2–3 minutes
+
+No obvious jitter, no “stuck on edges” issues
+
+Phase 1 — Production-Ready Single-Player Loop (Stability + Performance)
+Tasks (in order)
+
+Pooling
+
+Implement object pooling for props + VFX
+
+Remove frequent Instantiate/Destroy
+
+Juice
+
+Suction “pull” (cosmetic) when eligible and near
+
+Drop tween, particles, sound
+
+Minor screen shake on large eats
+
+Performance hygiene
+
+Simplify colliders (box/sphere/capsule)
+
+Reduce physics overhead (many props can be static/kinematic until near)
+
+UI polish
+
+Simple HUD: timer, score, size meter
+
+Pause/restart
+
+Tuning pass
+
+Growth curve based on area/mass; derive radius
+
+Adjust object values & tiers so progression feels smooth
+
+Done criteria
+
+Stable frame time on target phone/tablet with ~200+ props
+
+No garbage-collection spikes during play
+
+“Feel” is good enough you’d happily show kids
+
+Phase 2 — Multiplayer Host Mode + Join Code Lobby (Movement Sync)
+Tasks (in order)
+
+Networking skeleton
+
+Integrate Photon Fusion (or chosen net stack)
+
+Implement Host Mode session start
+
+Join-code flow
+
+Host: Create match → display join code
+
+Client: Enter join code → join
+
+Lobby list: names + ready state
+
+Authoritative movement
+
+Clients send input frames only
+
+Host/server simulates movement and replicates transforms
+
+Client interpolation/prediction for smoothness
+
+Match start / end
+
+Host starts match; all clients load scene
+
+End condition sends results to all
+
+Done criteria
+
+4–8 players can join via code on Wi-Fi and move smoothly
+
+Movement is server-authoritative (client can’t teleport itself)
+
+Match start/end works reliably without manual resets
+
+Phase 3 — Shared World (Deterministic Spawn + Authoritative Consume Events)
+Tasks (in order)
+
+Deterministic prop spawning
+
+Add mapSeed and spawnAlgoVersion
+
+All clients spawn the same objects in same order → stable objectId
+
+Server “truth” store
+
+Server maintains consumedSet (bitset or hashset initially)
+
+Consume checks on server
+
+Server runs consume eligibility per tick:
+
+distance <= inner radius
+
+holeRadius >= requiredRadius
+
+Arbitration for contested eats
+
+If multiple players eligible in same tick:
+
+smallest distance wins
+
+tie: larger radius wins
+
+tie: lowest playerId wins
+
+Broadcast consume event
+
+ObjectConsumed(objectId, eaterId, areaAfter, scoreAfter, eventSeq)
+
+Clients hide the prop and play local VFX
+
+Client prediction (optional)
+
+Hide locally when “almost eaten”, mark pending
+
+Confirm on server event; correct if needed
+
+Done criteria
+
+When any player eats an object, it disappears for everyone
+
+No duplicate consumption of the same object across clients
+
+ConsumedSet stays consistent for a full match
+
+Phase 4 — Battle Royale (Hole vs Hole + Mass Transfer)
+Tasks (in order)
+
+BR match rules
+
+One life, last alive wins
+
+Define kill margin (e.g., predator radius >= prey radius * 1.1)
+
+Server kill detection
+
+Server checks hole-vs-hole overlaps / distances
+
+Priority ordering: resolve player-eats-player before object eats (recommended)
+
+Mass/score transfer
+
+Predator gains prey holeArea (and score if you choose)
+
+Prey eliminated → spectate
+
+Authoritative event
+
+PlayerEaten(predatorId, preyId, predatorAreaAfter, predatorScoreAfter, preyEliminated, eventSeq)
+
+Spectate UX
+
+Switch camera to killer or leaderboard view
+
+Show “You were eaten by X”
+
+Done criteria
+
+Kills are deterministic and feel fair (no random outcomes)
+
+Predator size increases immediately and consistently on all clients
+
+Match ends cleanly with a winner screen
+
+Phase 5 — Late Joiners + Reconnects (Session Hardening)
+Tasks (in order)
+
+SnapshotFull
+
+Implement SnapshotFull payload:
+
+match seed/version
+
+timer/phase
+
+player states (pos, holeArea, score, alive)
+
+consumedSet bitset/chunks
+
+Late join
+
+New joiner receives SnapshotFull and spawns correct world state
+
+Reconnect token
+
+Server issues reconnect token on join
+
+Client stores it; uses it on reconnect
+
+Disconnect grace
+
+Player remains for N seconds (e.g. 30–60)
+
+On reconnect, reclaim same playerId/state
+
+Protection bubble
+
+Brief invulnerability after reconnect (3–5 seconds) to avoid unfair insta-death
+
+Done criteria
+
+Late joiner sees correct map (consumed props hidden) + correct players
+
+Reconnecting resumes the same player state
+
+No “ghost” players permanently stuck in match
+
+Phase 6 — Dedicated Server (Home Hardware First)
+Tasks (in order)
+
+Headless server build
+
+Build and run a Linux headless server version of the game
+
+No rendering; server authoritative simulation only
+
+Server Mode session hosting
+
+Server advertises/hosts matches (join-code mapped to match instance)
+
+Client connect
+
+Clients connect to server by join code
+
+Ops basics
+
+Server logs: join/leave, match start/end, event counts
+
+Crash restart script (systemd or simple supervisor)
+
+Stability testing
+
+Run 60-minute soak test with bots or a few devices
+
+Done criteria
+
+Match can run with no phone acting as host
+
+Dedicated server can host repeated matches without manual cleanup
+
+8–20 players works on LAN with stable tick
+
+Phase 7 — Remote Play (Outside Wi-Fi)
+Tasks (in order)
+
+Connectivity
+
+Choose: home port-forwarding OR small VPS public IP
+
+Join-code routing
+
+Join code maps to server address/port
+
+Graceful error messages: wrong code, server offline, full
+
+Timeouts and retries
+
+Reconnect attempts with backoff
+
+Basic abuse protection
+
+Rate limit join attempts per IP/device hash
+
+Lockout on repeated bad codes (short window)
+
+Network tuning
+
+Adjust send rate / interpolation for higher latency
+
+Validate “feel” is still acceptable
+
+Done criteria
+
+Players can join from outside home network reliably
+
+Reconnect works over mobile data / different Wi-Fi
+
+No major desync; contested consumes still deterministic
+
+Phase 8 — Platform Expansion (Desktop First, Consoles Later)
+Tasks (in order)
+
+Desktop builds
+
+Windows + macOS builds
+
+Keyboard/mouse and controller input support
+
+UI scaling
+
+Different aspect ratios + resolutions; safe zones
+
+Performance pass
+
+Higher view distance options; scalable quality settings
+
+Console feasibility work
+
+Dev program enrollment + dev kits (Switch/PS5)
+
+Certification constraints review
+
+Replace/adjust networking features to satisfy platform rules (later)
+
+Done criteria
+
+Desktop builds are stable and controller-friendly
+
+No mobile-only assumptions remain in core gameplay
+
+Console work is unblocked pending platform access
+
+Optional “Phase Gates” (recommended checkpoints)
+
+If you want sensible “stop/go” points:
+
+Gate A (after Phase 1): game is fun single-player for 5 minutes straight
+
+Gate B (after Phase 3): multiplayer shared world stays consistent for full match
+
+Gate C (after Phase 6): dedicated server runs unattended for a week (kids will find bugs)

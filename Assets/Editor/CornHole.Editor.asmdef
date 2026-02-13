@@ -1,0 +1,21 @@
+{
+    "name": "CornHole.Editor",
+    "rootNamespace": "CornHole.Editor",
+    "references": [
+        "CornHole.Scripts",
+        "Fusion.Unity",
+        "Unity.TextMeshPro",
+        "UnityEngine.UI"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

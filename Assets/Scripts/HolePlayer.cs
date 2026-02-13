@@ -180,13 +180,5 @@ namespace CornHole
         {
             PlayerName = name;
         }
-
-        public void OnPlayerLeft()
-        {
-            if (Object.HasStateAuthority)
-            {
-                Runner.Despawn(Object);
-            }
-        }
     }
 }

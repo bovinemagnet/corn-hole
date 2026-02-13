@@ -48,6 +48,8 @@ namespace CornHole
         private HolePlayer _localPlayer;
         private MatchTimer _matchTimer;
         private bool _isReady;
+        private float _lobbyRefreshTimer;
+        private const float LobbyRefreshInterval = 0.5f;
 
         private void Start()
         {
@@ -205,13 +207,6 @@ namespace CornHole
                 joinCodeDisplay.text = $"Join Code: {_networkManager.JoinCode}";
             }
 
-            // Only host sees the start button
-            if (startMatchButton != null)
-            {
-                startMatchButton.gameObject.SetActive(
-                    _networkManager != null && _networkManager.IsHost);
-            }
-
             // Reset ready state
             _isReady = false;
             UpdateReadyButtonLabel();
@@ -225,10 +220,15 @@ namespace CornHole
 
         private void UpdateLobbyDisplay()
         {
+            _lobbyRefreshTimer -= Time.deltaTime;
+            if (_lobbyRefreshTimer > 0f) return;
+            _lobbyRefreshTimer = LobbyRefreshInterval;
+
+            HolePlayer[] players = FindObjectsByType<HolePlayer>(FindObjectsSortMode.None);
+
             // Update player list
             if (playerListText != null)
             {
-                HolePlayer[] players = FindObjectsByType<HolePlayer>(FindObjectsSortMode.None);
                 string list = "";
                 foreach (var player in players)
                 {
@@ -241,16 +241,21 @@ namespace CornHole
                 playerListText.text = list;
             }
 
-            // Enable start button only when at least one player is ready
-            if (startMatchButton != null && _networkManager != null && _networkManager.IsHost)
+            // Show/enable start button for host only
+            if (startMatchButton != null)
             {
-                bool anyReady = false;
-                HolePlayer[] players = FindObjectsByType<HolePlayer>(FindObjectsSortMode.None);
-                foreach (var player in players)
+                bool isHost = _networkManager != null && _networkManager.IsHost;
+                startMatchButton.gameObject.SetActive(isHost);
+
+                if (isHost)
                 {
-                    if (player.IsReady) { anyReady = true; break; }
+                    bool anyReady = false;
+                    foreach (var player in players)
+                    {
+                        if (player.IsReady) { anyReady = true; break; }
+                    }
+                    startMatchButton.interactable = anyReady;
                 }
-                startMatchButton.interactable = anyReady;
             }
         }
 
@@ -357,11 +362,17 @@ namespace CornHole
 
         private void OnReturnToMenu()
         {
+            if (_networkManager != null)
+            {
+                _networkManager.Disconnect();
+            }
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
 
         private void ShowMenu()
         {
+            _gamePanelShown = false;
+            _endScreenShown = false;
             SetAllPanels(false);
             if (menuPanel != null) menuPanel.SetActive(true);
         }

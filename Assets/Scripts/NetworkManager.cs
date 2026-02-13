@@ -58,10 +58,42 @@ namespace CornHole
         }
 
         /// <summary>
+        /// Shut down the current session and reset state.
+        /// Call before returning to menu or starting a new session.
+        /// </summary>
+        public async void Disconnect()
+        {
+            if (_runner != null)
+            {
+                await _runner.Shutdown();
+                Destroy(_runner);
+                _runner = null;
+            }
+
+            // Remove any lingering NetworkSceneManagerDefault
+            var sceneManager = GetComponent<NetworkSceneManagerDefault>();
+            if (sceneManager != null)
+            {
+                Destroy(sceneManager);
+            }
+
+            _spawnedPlayers.Clear();
+            _matchTimerSpawned = false;
+            MatchTimer = null;
+            JoinCode = null;
+        }
+
+        /// <summary>
         /// Host a new game. Generates a join code and starts a Fusion session.
         /// </summary>
         public async void StartHost()
         {
+            if (_runner != null)
+            {
+                Debug.LogWarning("Already connected. Disconnect first.");
+                return;
+            }
+
             JoinCode = GenerateJoinCode();
             Debug.Log($"Hosting with join code: {JoinCode}");
 
@@ -94,6 +126,12 @@ namespace CornHole
         /// </summary>
         public async void JoinGame(string joinCode)
         {
+            if (_runner != null)
+            {
+                Debug.LogWarning("Already connected. Disconnect first.");
+                return;
+            }
+
             JoinCode = joinCode.ToUpper().Trim();
             Debug.Log($"Joining with code: {JoinCode}");
 

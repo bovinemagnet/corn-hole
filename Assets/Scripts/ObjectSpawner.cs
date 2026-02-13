@@ -19,6 +19,7 @@ namespace CornHole
         [Networked] private TickTimer SpawnTimer { get; set; }
         private int currentObjectCount = 0;
         private MatchTimer _matchTimer;
+        private bool _matchStartHandled;
 
         public override void Spawned()
         {
@@ -43,6 +44,14 @@ namespace CornHole
 
             if (_matchTimer == null || !_matchTimer.IsPlaying)
                 return;
+
+            // Reset count when match starts
+            if (!_matchStartHandled)
+            {
+                currentObjectCount = 0;
+                SpawnTimer = TickTimer.CreateFromSeconds(Runner, spawnInterval);
+                _matchStartHandled = true;
+            }
 
             if (SpawnTimer.Expired(Runner))
             {

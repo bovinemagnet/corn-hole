@@ -3,7 +3,7 @@
 ## Corn Hole - Multiplayer Hole.io Game
 
 **Version**: 1.0.0  
-**Unity Version**: 2022.3.10f1  
+**Unity Version**: 6.3  
 **Platform**: Android, iOS, Desktop  
 **Networking**: Photon Fusion (Host Mode)
 
@@ -163,7 +163,7 @@ corn-hole/
 
 | Component | Technology | Version |
 |-----------|-----------|---------|
-| Game Engine | Unity | 2022.3.10f1 LTS |
+| Game Engine | Unity | 6.3 LTS |
 | Networking | Photon Fusion | Latest |
 | Language | C# | .NET Standard 2.1 |
 | UI | Unity UI + TextMeshPro | Built-in |
@@ -175,7 +175,7 @@ corn-hole/
 ## Next Steps for Users
 
 ### Immediate (Required)
-1. Open project in Unity 2022.3.10f1+
+1. Open project in Unity 6.3+
 2. Install Photon Fusion from Asset Store
 3. Get Photon App ID from dashboard
 4. Configure App ID in Fusion settings

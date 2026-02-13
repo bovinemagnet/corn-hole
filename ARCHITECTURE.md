@@ -393,7 +393,7 @@ This modular structure with assembly definitions keeps netcode and gameplay sepa
 ## Technology Stack
 
 ### Core Technologies
-- **Unity**: 2022.3 LTS
+- **Unity**: 6.3
 - **Photon Fusion**: Real-time networking
 - **C#**: .NET Standard 2.1
 

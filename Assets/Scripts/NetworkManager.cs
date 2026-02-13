@@ -15,6 +15,7 @@ namespace CornHole
     {
         [Header("Network Settings")]
         [SerializeField] private NetworkPrefabRef playerPrefab;
+        [SerializeField] private NetworkPrefabRef matchTimerPrefab;
         [SerializeField] private string gameVersion = "1.0";
         [SerializeField] private int maxPlayers = 8;
 
@@ -33,6 +34,7 @@ namespace CornHole
 
         private NetworkRunner _runner;
         private Dictionary<PlayerRef, NetworkObject> _spawnedPlayers = new Dictionary<PlayerRef, NetworkObject>();
+        private bool _matchTimerSpawned;
 
         private void Awake()
         {
@@ -69,6 +71,13 @@ namespace CornHole
             if (runner.IsServer)
             {
                 Debug.Log($"Player {player} joined");
+
+                // Spawn match timer once (first player triggers it)
+                if (!_matchTimerSpawned)
+                {
+                    runner.Spawn(matchTimerPrefab, Vector3.zero, Quaternion.identity);
+                    _matchTimerSpawned = true;
+                }
 
                 // Spawn player at a spawn point
                 Vector3 spawnPosition = GetSpawnPoint(player);

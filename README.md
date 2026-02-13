@@ -29,7 +29,7 @@ This is a multiplayer game where players control a hole in the ground that moves
 
 ## Technology Stack
 
-- **Engine**: Unity 2022.3.10f1
+- **Engine**: Unity 6.3
 - **Networking**: Photon Fusion
 - **Platform**: Android, iOS (with desktop support for testing)
 - **Language**: C#
@@ -53,7 +53,7 @@ Assets/
 
 ### Prerequisites
 
-1. Unity 2022.3.10f1 or newer
+1. Unity 6.3 or newer
 2. Photon Fusion SDK (install via Unity Package Manager or Asset Store)
 3. TextMeshPro (included in Unity packages)
 

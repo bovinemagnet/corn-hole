@@ -3,7 +3,8 @@
     "rootNamespace": "CornHole",
     "references": [
         "Fusion.Runtime",
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "UnityEngine.UI"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

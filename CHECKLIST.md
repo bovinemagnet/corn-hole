@@ -5,7 +5,7 @@ Use this checklist to set up and test the Corn Hole multiplayer game.
 ## ☐ Initial Setup
 
 ### Prerequisites
-- [ ] Unity 2022.3.10f1 (or newer LTS) installed
+- [ ] Unity 6.3 (or newer LTS) installed
 - [ ] Unity Hub installed
 - [ ] Git installed
 - [ ] Code editor (Visual Studio, VS Code, or Rider)

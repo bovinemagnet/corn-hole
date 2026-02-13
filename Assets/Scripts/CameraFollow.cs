@@ -4,6 +4,7 @@ namespace CornHole
 {
     /// <summary>
     /// Makes the camera follow the local player's hole
+    /// with dynamic zoom based on hole size.
     /// </summary>
     public class CameraFollow : MonoBehaviour
     {
@@ -12,8 +13,21 @@ namespace CornHole
         [SerializeField] private float smoothSpeed = 5f;
         [SerializeField] private bool lookAtTarget = true;
 
+        [Header("Zoom Settings")]
+        [SerializeField] private float minHeight = 12f;
+        [SerializeField] private float maxHeight = 35f;
+        [SerializeField] private float minRadius = 1f;
+        [SerializeField] private float maxRadius = 10f;
+        [SerializeField] private float zoomSmoothSpeed = 3f;
+
         private Transform target;
         private HolePlayer localPlayer;
+        private float _currentZoomHeight;
+
+        private void Start()
+        {
+            _currentZoomHeight = minHeight;
+        }
 
         private void Update()
         {
@@ -31,7 +45,7 @@ namespace CornHole
         {
             if (localPlayer == null)
             {
-                HolePlayer[] players = FindObjectsOfType<HolePlayer>();
+                HolePlayer[] players = FindObjectsByType<HolePlayer>(FindObjectsSortMode.None);
                 foreach (var player in players)
                 {
                     if (player.Object != null && player.Object.HasInputAuthority)
@@ -46,7 +60,14 @@ namespace CornHole
 
         private void FollowTarget()
         {
-            Vector3 desiredPosition = target.position + offset;
+            // Calculate dynamic zoom height based on hole radius
+            float radiusFraction = Mathf.InverseLerp(minRadius, maxRadius, localPlayer.HoleRadius);
+            float targetZoomHeight = Mathf.Lerp(minHeight, maxHeight, radiusFraction);
+            _currentZoomHeight = Mathf.Lerp(_currentZoomHeight, targetZoomHeight, zoomSmoothSpeed * Time.deltaTime);
+
+            // Apply dynamic offset with zoom height
+            Vector3 dynamicOffset = new Vector3(offset.x, _currentZoomHeight, offset.z);
+            Vector3 desiredPosition = target.position + dynamicOffset;
             Vector3 smoothedPosition = Vector3.Lerp(transform.position, desiredPosition, smoothSpeed * Time.deltaTime);
             transform.position = smoothedPosition;
 

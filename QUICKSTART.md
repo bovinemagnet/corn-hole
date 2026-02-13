@@ -6,7 +6,7 @@ This guide will help you get the Corn Hole game running as quickly as possible.
 
 ## Prerequisites
 
-- Unity 2022.3.10f1 or newer installed
+- Unity 6.3 or newer installed
 - Photon account (free tier is fine)
 - Git
 

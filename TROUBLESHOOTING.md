@@ -408,7 +408,7 @@ If problem persists:
 
 When encountering an issue, check:
 
-- [ ] Unity version matches (2022.3.10f1+)
+- [ ] Unity version matches (6.3+)
 - [ ] Photon Fusion installed correctly
 - [ ] App ID configured
 - [ ] Internet connection working

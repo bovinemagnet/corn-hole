@@ -4,7 +4,8 @@ using Fusion;
 namespace CornHole
 {
     /// <summary>
-    /// Spawns consumable objects randomly in the game world
+    /// Spawns consumable objects randomly in the game world.
+    /// Only spawns during the Playing phase.
     /// </summary>
     public class ObjectSpawner : NetworkBehaviour
     {
@@ -17,9 +18,12 @@ namespace CornHole
 
         [Networked] private TickTimer SpawnTimer { get; set; }
         private int currentObjectCount = 0;
+        private MatchTimer _matchTimer;
 
         public override void Spawned()
         {
+            _matchTimer = FindAnyObjectByType<MatchTimer>();
+
             if (Object.HasStateAuthority)
             {
                 SpawnTimer = TickTimer.CreateFromSeconds(Runner, spawnInterval);
@@ -29,6 +33,15 @@ namespace CornHole
         public override void FixedUpdateNetwork()
         {
             if (!Object.HasStateAuthority)
+                return;
+
+            // Only spawn objects during the Playing phase
+            if (_matchTimer == null)
+            {
+                _matchTimer = FindAnyObjectByType<MatchTimer>();
+            }
+
+            if (_matchTimer == null || !_matchTimer.IsPlaying)
                 return;
 
             if (SpawnTimer.Expired(Runner))
@@ -43,20 +56,17 @@ namespace CornHole
 
         private void SpawnRandomObject()
         {
-            // Select random prefab
             int prefabIndex = Random.Range(0, consumablePrefabs.Length);
             NetworkPrefabRef prefab = consumablePrefabs[prefabIndex];
 
-            // Random position within spawn area
             Vector3 randomPos = new Vector3(
                 Random.Range(-spawnAreaSize.x / 2, spawnAreaSize.x / 2),
                 spawnHeight,
                 Random.Range(-spawnAreaSize.z / 2, spawnAreaSize.z / 2)
             );
 
-            // Spawn the object
             NetworkObject spawnedObject = Runner.Spawn(prefab, randomPos, Quaternion.identity);
-            
+
             if (spawnedObject != null)
             {
                 currentObjectCount++;

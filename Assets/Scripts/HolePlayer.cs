@@ -4,7 +4,8 @@ using Fusion;
 namespace CornHole
 {
     /// <summary>
-    /// Network Player component for the hole.
+    /// Network player component for the hole.
+    /// Uses Fusion input system for client-side prediction.
     /// Handles movement, area-based growth, and consuming objects.
     /// </summary>
     public class HolePlayer : NetworkBehaviour
@@ -23,14 +24,20 @@ namespace CornHole
         [SerializeField] private Transform holeVisual;
         [SerializeField] private SphereCollider consumeCollider;
 
-        // Networked properties
+        // Networked properties — synchronised by Fusion
         [Networked] public float HoleRadius { get; set; }
         [Networked] public float HoleArea { get; set; }
         [Networked] public int Score { get; set; }
-        [Networked] public Vector3 Position { get; set; }
 
-        private Vector3 _velocity;
+        // Lobby properties
+        [Networked] public NetworkString<_16> PlayerName { get; set; }
+        [Networked] public NetworkBool IsReady { get; set; }
+
+        // Movement state — networked for rollback prediction
+        [Networked] private Vector3 Velocity { get; set; }
+
         private ObjectSpawner _spawner;
+        private MatchTimer _matchTimer;
 
         public override void Spawned()
         {
@@ -39,24 +46,25 @@ namespace CornHole
                 HoleRadius = initialRadius;
                 HoleArea = Mathf.PI * initialRadius * initialRadius;
                 Score = 0;
-                Position = transform.position;
+                IsReady = false;
             }
 
             _spawner = FindAnyObjectByType<ObjectSpawner>();
+            _matchTimer = FindAnyObjectByType<MatchTimer>();
             UpdateHoleScale();
         }
 
         public override void FixedUpdateNetwork()
         {
-            if (Object.HasStateAuthority)
+            // Only move during the Playing phase
+            if (_matchTimer == null)
+            {
+                _matchTimer = FindAnyObjectByType<MatchTimer>();
+            }
+
+            if (_matchTimer != null && _matchTimer.IsPlaying)
             {
                 HandleMovement();
-                Position = transform.position;
-            }
-            else
-            {
-                // Interpolate position for remote players
-                transform.position = Position;
             }
 
             UpdateHoleScale();
@@ -64,48 +72,43 @@ namespace CornHole
 
         private void HandleMovement()
         {
+            if (!GetInput(out NetworkInputData data))
+                return;
+
             float dt = Runner.DeltaTime;
-            Vector3 inputDirection = Vector3.zero;
 
-#if UNITY_ANDROID || UNITY_IOS
-            // Mobile touch input
-            if (Input.touchCount > 0)
+            // Normalise to prevent speed cheating (magnitude clamped to 1)
+            Vector2 rawInput = data.MoveDirection;
+            if (rawInput.sqrMagnitude > 1f)
             {
-                Touch touch = Input.GetTouch(0);
-                Vector3 touchWorldPos = Camera.main.ScreenToWorldPoint(new Vector3(touch.position.x, touch.position.y, 10f));
-                inputDirection = (touchWorldPos - transform.position).normalized;
-                inputDirection.y = 0;
+                rawInput.Normalize();
             }
-#else
-            // Desktop input for testing — use GetAxisRaw to avoid Unity's built-in smoothing
-            float horizontal = Input.GetAxisRaw("Horizontal");
-            float vertical = Input.GetAxisRaw("Vertical");
-            inputDirection = new Vector3(horizontal, 0, vertical);
 
-            // Clamp magnitude to 1 to prevent faster diagonal movement
-            if (inputDirection.sqrMagnitude > 1f)
-            {
-                inputDirection.Normalize();
-            }
-#endif
+            Vector3 inputDirection = new Vector3(rawInput.x, 0f, rawInput.y);
+            Vector3 vel = Velocity;
 
             if (inputDirection.sqrMagnitude > 0.01f)
             {
                 // Accelerate towards target velocity
                 Vector3 targetVelocity = inputDirection * moveSpeed;
-                _velocity = Vector3.MoveTowards(_velocity, targetVelocity, acceleration * dt);
+                vel = Vector3.MoveTowards(vel, targetVelocity, acceleration * dt);
 
                 // Rotate towards movement direction
-                Quaternion targetRotation = Quaternion.LookRotation(_velocity.normalized);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * dt);
+                if (vel.sqrMagnitude > 0.001f)
+                {
+                    Quaternion targetRotation = Quaternion.LookRotation(vel.normalized);
+                    transform.rotation = Quaternion.Slerp(
+                        transform.rotation, targetRotation, rotationSpeed * dt);
+                }
             }
             else
             {
                 // Decelerate to stop
-                _velocity = Vector3.MoveTowards(_velocity, Vector3.zero, deceleration * dt);
+                vel = Vector3.MoveTowards(vel, Vector3.zero, deceleration * dt);
             }
 
-            transform.position += _velocity * dt;
+            Velocity = vel;
+            transform.position += vel * dt;
         }
 
         private void UpdateHoleScale()
@@ -127,6 +130,10 @@ namespace CornHole
             if (!Object.HasStateAuthority)
                 return;
 
+            // Only consume during Playing phase
+            if (_matchTimer == null || !_matchTimer.IsPlaying)
+                return;
+
             ConsumableObject consumable = other.GetComponent<ConsumableObject>();
             if (consumable != null && consumable.CanBeConsumed(HoleRadius))
             {
@@ -136,22 +143,36 @@ namespace CornHole
 
         private void ConsumeObject(ConsumableObject consumable)
         {
-            // Increase score
             Score += consumable.PointValue;
 
-            // Grow the hole using area-based formula
             float maxArea = Mathf.PI * maxRadius * maxRadius;
             HoleArea = Mathf.Min(HoleArea + consumable.SizeValue, maxArea);
             HoleRadius = Mathf.Sqrt(HoleArea / Mathf.PI);
 
-            // Notify the spawner so it can decrement its count
             if (_spawner != null)
             {
                 _spawner.OnObjectConsumed();
             }
 
-            // Destroy the consumable (pass hole position for suction animation)
             consumable.Consume(transform.position);
+        }
+
+        /// <summary>
+        /// Toggle ready state. Called via RPC from input authority.
+        /// </summary>
+        [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+        public void RPC_SetReady(NetworkBool ready)
+        {
+            IsReady = ready;
+        }
+
+        /// <summary>
+        /// Set player name. Called via RPC from input authority on spawn.
+        /// </summary>
+        [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+        public void RPC_SetPlayerName(NetworkString<_16> name)
+        {
+            PlayerName = name;
         }
 
         public void OnPlayerLeft()

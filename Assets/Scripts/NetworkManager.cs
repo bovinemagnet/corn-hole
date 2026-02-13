@@ -105,7 +105,7 @@ namespace CornHole
                 GameMode = GameMode.Host,
                 SessionName = JoinCode,
                 PlayerCount = maxPlayers,
-                Scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex,
+                Scene = GetCurrentSceneInfo(),
                 SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>()
             });
 
@@ -142,7 +142,7 @@ namespace CornHole
             {
                 GameMode = GameMode.Client,
                 SessionName = JoinCode,
-                Scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex,
+                Scene = GetCurrentSceneInfo(),
                 SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>()
             });
 
@@ -163,6 +163,14 @@ namespace CornHole
 
         /// <summary>Reference to the MatchTimer once spawned.</summary>
         public MatchTimer MatchTimer { get; private set; }
+
+        private NetworkSceneInfo GetCurrentSceneInfo()
+        {
+            var sceneInfo = new NetworkSceneInfo();
+            sceneInfo.AddSceneRef(
+                SceneRef.FromIndex(UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex));
+            return sceneInfo;
+        }
 
         private string GenerateJoinCode()
         {

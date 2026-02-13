@@ -225,7 +225,6 @@ namespace CornHole
         public void OnConnectedToServer(NetworkRunner runner)
         {
             Debug.Log("Connected to server");
-            OnSessionJoined?.Invoke();
         }
 
         public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)

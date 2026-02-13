@@ -52,6 +52,12 @@ namespace CornHole
             _spawner = FindAnyObjectByType<ObjectSpawner>();
             _matchTimer = FindAnyObjectByType<MatchTimer>();
             UpdateHoleScale();
+
+            // Set a default player name from the input authority side
+            if (Object.HasInputAuthority)
+            {
+                RPC_SetPlayerName($"Player {Object.InputAuthority.PlayerId}");
+            }
         }
 
         public override void FixedUpdateNetwork()

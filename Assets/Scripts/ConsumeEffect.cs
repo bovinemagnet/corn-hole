@@ -54,7 +54,16 @@ namespace CornHole
 
             if (t >= 1f)
             {
-                Destroy(gameObject);
+                var consumable = GetComponent<ConsumableObject>();
+                if (consumable != null)
+                {
+                    consumable.OnConsumeAnimationComplete();
+                }
+                else
+                {
+                    // Fallback for clones (legacy path)
+                    Destroy(gameObject);
+                }
             }
         }
     }

@@ -1,13 +1,12 @@
 using UnityEngine;
-using Fusion;
 
 namespace CornHole
 {
     /// <summary>
-    /// Represents an object that can be consumed by the hole.
-    /// Includes particle and audio feedback scaled by object size.
+    /// A locally-spawned consumable object. Not networked — spawned deterministically
+    /// from a shared seed on all clients. The server decides consumption via ConsumeArbiter.
     /// </summary>
-    public class ConsumableObject : NetworkBehaviour
+    public class ConsumableObject : MonoBehaviour
     {
         [Header("Object Properties")]
         [SerializeField] private float objectSize = 1f;
@@ -22,12 +21,17 @@ namespace CornHole
         [SerializeField] private AudioClip consumeSound;
         [SerializeField] private float baseSoundVolume = 0.5f;
 
-        [Networked] public bool IsConsumed { get; set; }
+        /// <summary>Deterministic ID assigned by ObjectSpawner.</summary>
+        public int ObjectId { get; set; }
+
+        /// <summary>Minimum hole radius needed to consume this object.</summary>
+        public float ObjectSize => objectSize;
 
         public int PointValue => pointValue;
         public float SizeValue => sizeValue;
+        public bool IsConsumed { get; private set; }
 
-        public override void Spawned()
+        private void Awake()
         {
             if (rb == null)
             {
@@ -41,82 +45,63 @@ namespace CornHole
                 rb.interpolation = RigidbodyInterpolation.Interpolate;
                 rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
             }
-
-            IsConsumed = false;
         }
 
+        /// <summary>
+        /// Check whether this object can be consumed by a hole of the given radius.
+        /// </summary>
         public bool CanBeConsumed(float holeRadius)
         {
-            // Object can only be consumed if it's smaller than the hole
-            // and if it hasn't already been consumed
             return !IsConsumed && objectSize <= holeRadius;
         }
 
-        public void Consume(Vector3 holePosition)
+        /// <summary>
+        /// Called on all clients when the server confirms this object was consumed.
+        /// Plays the shrink/spin/sink animation on the real object, then disables it.
+        /// </summary>
+        public void PlayConsumeAnimation(Vector3 holePosition)
         {
-            if (Object.HasStateAuthority && !IsConsumed)
-            {
-                IsConsumed = true;
-                RPC_PlayConsumeEffect(holePosition);
-                Runner.Despawn(Object);
-            }
-        }
+            if (IsConsumed)
+                return;
 
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-        private void RPC_PlayConsumeEffect(Vector3 holePosition)
-        {
-            // Suction animation — visual clone that outlives the despawned object
-            CreateVisualClone(holePosition);
+            IsConsumed = true;
 
-            // Scale intensity by object size for proportional feedback
-            float intensity = Mathf.Clamp01(sizeValue);
-
-            // Particle effect — detach so it outlives the despawned object
-            if (consumeParticles != null)
-            {
-                consumeParticles.transform.SetParent(null);
-
-                var main = consumeParticles.main;
-                main.startSizeMultiplier *= (1f + intensity);
-
-                consumeParticles.Play();
-
-                // Auto-destroy the orphaned particle system after its duration
-                Destroy(consumeParticles.gameObject, main.duration + main.startLifetime.constantMax);
-            }
-
-            // Audio — volume scaled by size
+            // Audio — play before animation disables the object
             if (consumeSound != null)
             {
+                float intensity = Mathf.Clamp01(sizeValue);
                 float volume = baseSoundVolume * (0.5f + intensity);
                 AudioSource.PlayClipAtPoint(consumeSound, transform.position, volume);
             }
+
+            // Particle effect — detach so it outlives the disabled object
+            if (consumeParticles != null)
+            {
+                consumeParticles.transform.SetParent(null);
+                var main = consumeParticles.main;
+                main.startSizeMultiplier *= (1f + Mathf.Clamp01(sizeValue));
+                consumeParticles.Play();
+                Destroy(consumeParticles.gameObject, main.duration + main.startLifetime.constantMax);
+            }
+
+            // Disable physics so the object stops interacting
+            if (rb != null)
+            {
+                rb.isKinematic = true;
+            }
+
+            // Add ConsumeEffect to drive the shrink/spin/sink animation
+            var effect = gameObject.AddComponent<ConsumeEffect>();
+            effect.Initialise(holePosition, sizeValue);
         }
 
-        private void CreateVisualClone(Vector3 holePosition)
+        /// <summary>
+        /// Called by ConsumeEffect when the animation finishes.
+        /// Disables the GameObject rather than destroying it.
+        /// </summary>
+        public void OnConsumeAnimationComplete()
         {
-            var sourceRenderer = GetComponentInChildren<MeshRenderer>();
-            if (sourceRenderer == null)
-                return;
-
-            var sourceMeshFilter = sourceRenderer.GetComponent<MeshFilter>();
-            if (sourceMeshFilter == null || sourceMeshFilter.sharedMesh == null)
-                return;
-
-            var clone = new GameObject("ConsumeClone");
-            clone.transform.position = sourceRenderer.transform.position;
-            clone.transform.rotation = sourceRenderer.transform.rotation;
-            clone.transform.localScale = sourceRenderer.transform.lossyScale;
-
-            var meshFilter = clone.AddComponent<MeshFilter>();
-            meshFilter.sharedMesh = sourceMeshFilter.sharedMesh;
-
-            var meshRenderer = clone.AddComponent<MeshRenderer>();
-            meshRenderer.sharedMaterials = sourceRenderer.sharedMaterials;
-            meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            meshRenderer.receiveShadows = false;
-
-            clone.AddComponent<ConsumeEffect>().Initialise(holePosition, sizeValue);
+            gameObject.SetActive(false);
         }
     }
 }

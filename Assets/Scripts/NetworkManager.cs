@@ -16,6 +16,7 @@ namespace CornHole
         [Header("Network Settings")]
         [SerializeField] private NetworkPrefabRef playerPrefab;
         [SerializeField] private NetworkPrefabRef matchTimerPrefab;
+        [SerializeField] private NetworkPrefabRef consumeArbiterPrefab;
         [SerializeField] private int maxPlayers = 8;
 
         [Header("Spawn Settings")]
@@ -80,6 +81,7 @@ namespace CornHole
             _spawnedPlayers.Clear();
             _matchTimerSpawned = false;
             MatchTimer = null;
+            ConsumeArbiter = null;
             JoinCode = null;
         }
 
@@ -164,6 +166,9 @@ namespace CornHole
         /// <summary>Reference to the MatchTimer once spawned.</summary>
         public MatchTimer MatchTimer { get; private set; }
 
+        /// <summary>Reference to the ConsumeArbiter once spawned.</summary>
+        public ConsumeArbiter ConsumeArbiter { get; private set; }
+
         private NetworkSceneInfo GetCurrentSceneInfo()
         {
             var sceneInfo = new NetworkSceneInfo();
@@ -238,6 +243,10 @@ namespace CornHole
                     var timerObj = runner.Spawn(matchTimerPrefab, Vector3.zero, Quaternion.identity);
                     MatchTimer = timerObj.GetComponent<MatchTimer>();
                     _matchTimerSpawned = true;
+
+                    // Spawn consume arbiter
+                    var arbiterObj = runner.Spawn(consumeArbiterPrefab, Vector3.zero, Quaternion.identity);
+                    ConsumeArbiter = arbiterObj.GetComponent<ConsumeArbiter>();
                 }
 
                 // Spawn player at a spawn point

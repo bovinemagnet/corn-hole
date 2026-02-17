@@ -6,7 +6,7 @@ namespace CornHole
     /// <summary>
     /// Network player component for the hole.
     /// Uses Fusion input system for client-side prediction.
-    /// Handles movement, area-based growth, and consuming objects.
+    /// Handles movement and visual scale. Consumption is handled by ConsumeArbiter.
     /// </summary>
     public class HolePlayer : NetworkBehaviour
     {
@@ -36,8 +36,10 @@ namespace CornHole
         // Movement state — networked for rollback prediction
         [Networked] private Vector3 Velocity { get; set; }
 
-        private ObjectSpawner _spawner;
         private MatchTimer _matchTimer;
+
+        /// <summary>Maximum hole area, derived from maxRadius.</summary>
+        public float MaxArea => Mathf.PI * maxRadius * maxRadius;
 
         public override void Spawned()
         {
@@ -49,11 +51,9 @@ namespace CornHole
                 IsReady = false;
             }
 
-            _spawner = FindAnyObjectByType<ObjectSpawner>();
             _matchTimer = FindAnyObjectByType<MatchTimer>();
             UpdateHoleScale();
 
-            // Set a default player name from the input authority side
             if (Object.HasInputAuthority)
             {
                 RPC_SetPlayerName($"Player {Object.InputAuthority.PlayerId}");
@@ -62,7 +62,6 @@ namespace CornHole
 
         public override void FixedUpdateNetwork()
         {
-            // Only move during the Playing phase
             if (_matchTimer == null)
             {
                 _matchTimer = FindAnyObjectByType<MatchTimer>();
@@ -83,7 +82,6 @@ namespace CornHole
 
             float dt = Runner.DeltaTime;
 
-            // Normalise to prevent speed cheating (magnitude clamped to 1)
             Vector2 rawInput = data.MoveDirection;
             if (rawInput.sqrMagnitude > 1f)
             {
@@ -95,11 +93,9 @@ namespace CornHole
 
             if (inputDirection.sqrMagnitude > 0.01f)
             {
-                // Accelerate towards target velocity
                 Vector3 targetVelocity = inputDirection * moveSpeed;
                 vel = Vector3.MoveTowards(vel, targetVelocity, acceleration * dt);
 
-                // Rotate towards movement direction
                 if (vel.sqrMagnitude > 0.001f)
                 {
                     Quaternion targetRotation = Quaternion.LookRotation(vel.normalized);
@@ -109,7 +105,6 @@ namespace CornHole
             }
             else
             {
-                // Decelerate to stop
                 vel = Vector3.MoveTowards(vel, Vector3.zero, deceleration * dt);
             }
 
@@ -121,7 +116,7 @@ namespace CornHole
         {
             if (holeVisual != null)
             {
-                float scale = HoleRadius * 2f; // Diameter
+                float scale = HoleRadius * 2f;
                 holeVisual.localScale = new Vector3(scale, 1f, scale);
             }
 
@@ -131,50 +126,12 @@ namespace CornHole
             }
         }
 
-        private void OnTriggerEnter(Collider other)
-        {
-            if (!Object.HasStateAuthority)
-                return;
-
-            // Only consume during Playing phase
-            if (_matchTimer == null || !_matchTimer.IsPlaying)
-                return;
-
-            ConsumableObject consumable = other.GetComponent<ConsumableObject>();
-            if (consumable != null && consumable.CanBeConsumed(HoleRadius))
-            {
-                ConsumeObject(consumable);
-            }
-        }
-
-        private void ConsumeObject(ConsumableObject consumable)
-        {
-            Score += consumable.PointValue;
-
-            float maxArea = Mathf.PI * maxRadius * maxRadius;
-            HoleArea = Mathf.Min(HoleArea + consumable.SizeValue, maxArea);
-            HoleRadius = Mathf.Sqrt(HoleArea / Mathf.PI);
-
-            if (_spawner != null)
-            {
-                _spawner.OnObjectConsumed();
-            }
-
-            consumable.Consume(transform.position);
-        }
-
-        /// <summary>
-        /// Toggle ready state. Called via RPC from input authority.
-        /// </summary>
         [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
         public void RPC_SetReady(NetworkBool ready)
         {
             IsReady = ready;
         }
 
-        /// <summary>
-        /// Set player name. Called via RPC from input authority on spawn.
-        /// </summary>
         [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
         public void RPC_SetPlayerName(NetworkString<_16> name)
         {

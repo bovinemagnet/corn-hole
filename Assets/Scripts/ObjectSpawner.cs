@@ -1,92 +1,176 @@
+using System.Collections.Generic;
 using UnityEngine;
-using Fusion;
 
 namespace CornHole
 {
     /// <summary>
-    /// Spawns consumable objects randomly in the game world.
-    /// Only spawns during the Playing phase.
+    /// Spawns consumable objects deterministically from a shared seed.
+    /// Runs identically on all clients — no networking. The ConsumeArbiter
+    /// provides the seed and triggers spawning at match start.
     /// </summary>
-    public class ObjectSpawner : NetworkBehaviour
+    public class ObjectSpawner : MonoBehaviour
     {
+        [Header("Prefabs")]
+        [SerializeField] private GameObject[] consumablePrefabs;
+
         [Header("Spawn Settings")]
-        [SerializeField] private NetworkPrefabRef[] consumablePrefabs;
+        [SerializeField] private int initialBatchSize = 30;
         [SerializeField] private int maxObjects = 50;
-        [SerializeField] private float spawnInterval = 2f;
-        [SerializeField] private Vector3 spawnAreaSize = new Vector3(40, 10, 40);
+        [SerializeField] private int waveSize = 5;
+        [SerializeField] private float waveIntervalSeconds = 5f;
+        [SerializeField] private Vector3 spawnAreaSize = new Vector3(40, 0, 40);
         [SerializeField] private float spawnHeight = 10f;
 
-        [Networked] private TickTimer SpawnTimer { get; set; }
-        private int currentObjectCount = 0;
-        private MatchTimer _matchTimer;
-        private bool _matchStartHandled;
+        private readonly Dictionary<int, ConsumableObject> _objectRegistry =
+            new Dictionary<int, ConsumableObject>();
 
-        public override void Spawned()
+        private System.Random _rng;
+        private int _nextObjectId;
+        private int _activeCount;
+        private bool _initialBatchSpawned;
+        private float _waveTimer;
+
+        /// <summary>Total objects spawned so far (consumed or not).</summary>
+        public int TotalSpawned => _nextObjectId;
+
+        /// <summary>
+        /// Initialise the spawner with a deterministic seed. Called by ConsumeArbiter
+        /// when the match transitions to Playing phase. All clients call this with the
+        /// same seed to produce identical worlds.
+        /// </summary>
+        public void Initialise(int seed)
         {
-            _matchTimer = FindAnyObjectByType<MatchTimer>();
-
-            if (Object.HasStateAuthority)
-            {
-                SpawnTimer = TickTimer.CreateFromSeconds(Runner, spawnInterval);
-            }
+            _rng = new System.Random(seed);
+            _nextObjectId = 0;
+            _activeCount = 0;
+            _initialBatchSpawned = false;
+            _waveTimer = 0f;
         }
 
-        public override void FixedUpdateNetwork()
+        /// <summary>
+        /// Spawn the initial batch of objects. Called once when match starts.
+        /// </summary>
+        public void SpawnInitialBatch()
         {
-            if (!Object.HasStateAuthority)
+            if (_rng == null || _initialBatchSpawned)
                 return;
 
-            // Only spawn objects during the Playing phase
-            if (_matchTimer == null)
+            int count = Mathf.Min(initialBatchSize, maxObjects);
+            for (int i = 0; i < count; i++)
             {
-                _matchTimer = FindAnyObjectByType<MatchTimer>();
+                SpawnDeterministicObject();
             }
 
-            if (_matchTimer == null || !_matchTimer.IsPlaying)
+            _initialBatchSpawned = true;
+            _waveTimer = waveIntervalSeconds;
+        }
+
+        /// <summary>
+        /// Called each frame during the Playing phase to spawn waves.
+        /// Uses real time (Time.deltaTime) since all clients run this identically.
+        /// </summary>
+        public void UpdateWaveSpawning()
+        {
+            if (_rng == null || !_initialBatchSpawned)
                 return;
 
-            // Reset count when match starts
-            if (!_matchStartHandled)
-            {
-                currentObjectCount = 0;
-                SpawnTimer = TickTimer.CreateFromSeconds(Runner, spawnInterval);
-                _matchStartHandled = true;
-            }
+            if (_activeCount >= maxObjects)
+                return;
 
-            if (SpawnTimer.Expired(Runner))
+            _waveTimer -= Time.deltaTime;
+            if (_waveTimer <= 0f)
             {
-                if (currentObjectCount < maxObjects && consumablePrefabs.Length > 0)
+                int toSpawn = Mathf.Min(waveSize, maxObjects - _activeCount);
+                for (int i = 0; i < toSpawn; i++)
                 {
-                    SpawnRandomObject();
+                    SpawnDeterministicObject();
                 }
-                SpawnTimer = TickTimer.CreateFromSeconds(Runner, spawnInterval);
+                _waveTimer = waveIntervalSeconds;
             }
         }
 
-        private void SpawnRandomObject()
+        /// <summary>
+        /// Look up a consumable by its deterministic object ID.
+        /// </summary>
+        public ConsumableObject GetObject(int objectId)
         {
-            int prefabIndex = Random.Range(0, consumablePrefabs.Length);
-            NetworkPrefabRef prefab = consumablePrefabs[prefabIndex];
+            _objectRegistry.TryGetValue(objectId, out ConsumableObject obj);
+            return obj;
+        }
 
-            Vector3 randomPos = new Vector3(
-                Random.Range(-spawnAreaSize.x / 2, spawnAreaSize.x / 2),
-                spawnHeight,
-                Random.Range(-spawnAreaSize.z / 2, spawnAreaSize.z / 2)
-            );
-
-            NetworkObject spawnedObject = Runner.Spawn(prefab, randomPos, Quaternion.identity);
-
-            if (spawnedObject != null)
+        /// <summary>
+        /// Mark an object as consumed (decrements active count).
+        /// Called by ConsumeArbiter when processing a consume event.
+        /// </summary>
+        public void MarkConsumed(int objectId)
+        {
+            if (_activeCount > 0)
             {
-                currentObjectCount++;
+                _activeCount--;
             }
         }
 
-        public void OnObjectConsumed()
+        /// <summary>
+        /// Returns all unconsumed objects for spatial queries.
+        /// </summary>
+        public IEnumerable<ConsumableObject> GetActiveObjects()
         {
-            if (currentObjectCount > 0)
+            foreach (var kvp in _objectRegistry)
             {
-                currentObjectCount--;
+                if (kvp.Value != null && !kvp.Value.IsConsumed)
+                {
+                    yield return kvp.Value;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Destroy all spawned objects and reset state.
+        /// Called when returning to menu or starting a new match.
+        /// </summary>
+        public void ClearAll()
+        {
+            foreach (var kvp in _objectRegistry)
+            {
+                if (kvp.Value != null)
+                {
+                    Destroy(kvp.Value.gameObject);
+                }
+            }
+            _objectRegistry.Clear();
+            _nextObjectId = 0;
+            _activeCount = 0;
+            _initialBatchSpawned = false;
+            _rng = null;
+        }
+
+        private void SpawnDeterministicObject()
+        {
+            if (consumablePrefabs == null || consumablePrefabs.Length == 0)
+                return;
+
+            // Deterministic prefab selection
+            int prefabIndex = _rng.Next(0, consumablePrefabs.Length);
+            GameObject prefab = consumablePrefabs[prefabIndex];
+
+            // Deterministic position
+            float x = (float)(_rng.NextDouble() * spawnAreaSize.x) - spawnAreaSize.x / 2f;
+            float z = (float)(_rng.NextDouble() * spawnAreaSize.z) - spawnAreaSize.z / 2f;
+            Vector3 position = new Vector3(x, spawnHeight, z);
+
+            // Deterministic rotation
+            float yRot = (float)(_rng.NextDouble() * 360.0);
+            Quaternion rotation = Quaternion.Euler(0f, yRot, 0f);
+
+            GameObject spawned = Instantiate(prefab, position, rotation);
+            ConsumableObject consumable = spawned.GetComponent<ConsumableObject>();
+
+            if (consumable != null)
+            {
+                int objectId = _nextObjectId++;
+                consumable.ObjectId = objectId;
+                _objectRegistry[objectId] = consumable;
+                _activeCount++;
             }
         }
     }

@@ -2,7 +2,7 @@
     "name": "CornHole.Scripts",
     "rootNamespace": "CornHole",
     "references": [
-        "Fusion.Runtime",
+        "Fusion.Unity",
         "Unity.TextMeshPro",
         "UnityEngine.UI"
     ],

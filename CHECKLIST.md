@@ -155,13 +155,29 @@ Use this checklist to set up and test the Corn Hole multiplayer game.
 - [ ] Position: (0, 15, -10)
 - [ ] Rotation: (45, 0, 0)
 
-### Setup UI (Basic)
+### Setup UI (Phase 2 — Lobby + Join Code)
 - [ ] GameObject > UI > Canvas (creates Canvas + EventSystem)
 - [ ] On Canvas, add GameUI component
-- [ ] Create UI structure (optional for now):
-  - [ ] Menu Panel with Host/Join buttons
-  - [ ] Game Panel with Score/Size text
-  - [ ] Assign references in GameUI component
+- [ ] Create **Menu Panel**:
+  - [ ] "Host Game" Button
+  - [ ] "Join Match" Button
+- [ ] Create **Join Panel**:
+  - [ ] TMP_InputField for join code entry
+  - [ ] "Join" Button (submitJoinButton)
+  - [ ] "Back" Button (backToMenuButton)
+  - [ ] TextMeshProUGUI for error messages (joinErrorText)
+- [ ] Create **Lobby Panel**:
+  - [ ] TextMeshProUGUI for join code display (joinCodeDisplay)
+  - [ ] TextMeshProUGUI for player list (playerListText)
+  - [ ] "Ready" Button with TextMeshProUGUI child (readyButtonLabel)
+  - [ ] "Start Match" Button (startMatchButton) — host only
+  - [ ] TextMeshProUGUI for countdown (countdownText)
+- [ ] Create **Game Panel (HUD)**:
+  - [ ] TextMeshProUGUI for Score, Size, Timer
+- [ ] Create **End Panel**:
+  - [ ] TextMeshProUGUI for Final Score, Final Size
+  - [ ] "Return to Menu" Button
+- [ ] Assign all references in GameUI component inspector
 
 ### Save Scene
 - [ ] File > Save (or Ctrl+S)
@@ -204,19 +220,41 @@ Use this checklist to set up and test the Corn Hole multiplayer game.
 - [ ] Click "Build and Run"
 - [ ] Choose save location
 - [ ] Wait for build (2-5 minutes)
-- [ ] **In built game**: Click "Host Game" button
-- [ ] **In Unity Editor**: Press Play
-- [ ] **In Editor**: Click "Join Game" button
 
-### Expected Results
-- [ ] Both instances connect
-- [ ] You see two holes in the game
-- [ ] Each can control their own hole
-- [ ] Objects fall from the sky
+### Host Flow (in built game)
+- [ ] Click "Host Game" button
+- [ ] Verify lobby panel appears with a 6-character join code
+- [ ] Verify player list shows your player name
+- [ ] Click "Ready" — verify [Ready] appears next to your name
+- [ ] Note the join code for the next step
+
+### Join Flow (in Unity Editor)
+- [ ] Press Play
+- [ ] Click "Join Match" button
+- [ ] Enter the join code from the built game
+- [ ] Click "Join"
+- [ ] Verify lobby panel appears showing both players
+
+### Lobby and Match Flow
+- [ ] Both players click "Ready"
+- [ ] Host clicks "Start Match"
+- [ ] Verify countdown (3, 2, 1) appears for both
+- [ ] Verify game HUD appears with timer, score, size
+
+### Expected Gameplay Results
+- [ ] Both instances show two holes
+- [ ] Each can control their own hole (arrow keys / touch)
+- [ ] Objects start spawning after countdown
 - [ ] Holes can consume objects (if small enough)
 - [ ] Hole grows when eating objects
-- [ ] Score increases
-- [ ] Both players see synchronized state
+- [ ] Score increases for the consuming player
+- [ ] Both players see synchronised state
+- [ ] Timer reaches 0, end screen appears for both
+- [ ] "Return to Menu" button works
+
+### Error Case Testing
+- [ ] Enter an invalid join code — verify error message appears
+- [ ] Try to join a full match (8 players) — verify "match full" error
 
 ### Mobile Test (Android)
 - [ ] Connect Android device via USB

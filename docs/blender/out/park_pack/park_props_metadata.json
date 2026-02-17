@@ -1,0 +1,731 @@
+{
+  "masterSeed": 1337,
+  "variantsPerProp": 3,
+  "map_size": {
+    "width": 80,
+    "height": 80
+  },
+  "spawn_algo_version": 1,
+  "props": [
+    {
+      "name": "PROP_Acorn",
+      "tier": "small",
+      "requiredRadius": 0.25,
+      "areaValue": 0.08,
+      "scoreValue": 1,
+      "variants": [
+        {
+          "variantIndex": 0,
+          "seed": 3678661433,
+          "file": "PROP_Acorn_v0.glb"
+        },
+        {
+          "variantIndex": 1,
+          "seed": 3678652641,
+          "file": "PROP_Acorn_v1.glb"
+        },
+        {
+          "variantIndex": 2,
+          "seed": 3678645385,
+          "file": "PROP_Acorn_v2.glb"
+        }
+      ]
+    },
+    {
+      "name": "PROP_PineCone",
+      "tier": "small",
+      "requiredRadius": 0.25,
+      "areaValue": 0.1,
+      "scoreValue": 1,
+      "variants": [
+        {
+          "variantIndex": 0,
+          "seed": 3252894768,
+          "file": "PROP_PineCone_v0.glb"
+        },
+        {
+          "variantIndex": 1,
+          "seed": 3252887528,
+          "file": "PROP_PineCone_v1.glb"
+        },
+        {
+          "variantIndex": 2,
+          "seed": 3252910976,
+          "file": "PROP_PineCone_v2.glb"
+        }
+      ]
+    },
+    {
+      "name": "PROP_LeafPile",
+      "tier": "small",
+      "requiredRadius": 0.3,
+      "areaValue": 0.12,
+      "scoreValue": 1,
+      "variants": [
+        {
+          "variantIndex": 0,
+          "seed": 2443089271,
+          "file": "PROP_LeafPile_v0.glb"
+        },
+        {
+          "variantIndex": 1,
+          "seed": 2443097775,
+          "file": "PROP_LeafPile_v1.glb"
+        },
+        {
+          "variantIndex": 2,
+          "seed": 2443104967,
+          "file": "PROP_LeafPile_v2.glb"
+        }
+      ]
+    },
+    {
+      "name": "PROP_RockSmall",
+      "tier": "small",
+      "requiredRadius": 0.3,
+      "areaValue": 0.12,
+      "scoreValue": 1,
+      "variants": [
+        {
+          "variantIndex": 0,
+          "seed": 2683013322,
+          "file": "PROP_RockSmall_v0.glb"
+        },
+        {
+          "variantIndex": 1,
+          "seed": 2683022098,
+          "file": "PROP_RockSmall_v1.glb"
+        },
+        {
+          "variantIndex": 2,
+          "seed": 2683031418,
+          "file": "PROP_RockSmall_v2.glb"
+        }
+      ]
+    },
+    {
+      "name": "PROP_RockLarge",
+      "tier": "small",
+      "requiredRadius": 0.4,
+      "areaValue": 0.18,
+      "scoreValue": 2,
+      "variants": [
+        {
+          "variantIndex": 0,
+          "seed": 735894246,
+          "file": "PROP_RockLarge_v0.glb"
+        },
+        {
+          "variantIndex": 1,
+          "seed": 735902014,
+          "file": "PROP_RockLarge_v1.glb"
+        },
+        {
+          "variantIndex": 2,
+          "seed": 735878486,
+          "file": "PROP_RockLarge_v2.glb"
+        }
+      ]
+    },
+    {
+      "name": "PROP_Mushroom",
+      "tier": "small",
+      "requiredRadius": 0.28,
+      "areaValue": 0.1,
+      "scoreValue": 1,
+      "variants": [
+        {
+          "variantIndex": 0,
+          "seed": 1223220608,
+          "file": "PROP_Mushroom_v0.glb"
+        },
+        {
+          "variantIndex": 1,
+          "seed": 1223229016,
+          "file": "PROP_Mushroom_v1.glb"
+        },
+        {
+          "variantIndex": 2,
+          "seed": 1223203376,
+          "file": "PROP_Mushroom_v2.glb"
+        }
+      ]
+    },
+    {
+      "name": "PROP_Ball",
+      "tier": "small",
+      "requiredRadius": 0.28,
+      "areaValue": 0.1,
+      "scoreValue": 2,
+      "variants": [
+        {
+          "variantIndex": 0,
+          "seed": 4090553950,
+          "file": "PROP_Ball_v0.glb"
+        },
+        {
+          "variantIndex": 1,
+          "seed": 4090545542,
+          "file": "PROP_Ball_v1.glb"
+        },
+        {
+          "variantIndex": 2,
+          "seed": 4090536430,
+          "file": "PROP_Ball_v2.glb"
+        }
+      ]
+    },
+    {
+      "name": "PROP_Frisbee",
+      "tier": "small",
+      "requiredRadius": 0.28,
+      "areaValue": 0.1,
+      "scoreValue": 2,
+      "variants": [
+        {
+          "variantIndex": 0,
+          "seed": 306502567,
+          "file": "PROP_Frisbee_v0.glb"
+        },
+        {
+          "variantIndex": 1,
+          "seed": 306509951,
+          "file": "PROP_Frisbee_v1.glb"
+        },
+        {
+          "variantIndex": 2,
+          "seed": 306486295,
+          "file": "PROP_Frisbee_v2.glb"
+        }
+      ]
+    },
+    {
+      "name": "PROP_Bucket",
+      "tier": "small",
+      "requiredRadius": 0.35,
+      "areaValue": 0.14,
+      "scoreValue": 2,
+      "variants": [
+        {
+          "variantIndex": 0,
+          "seed": 1170506406,
+          "file": "PROP_Bucket_v0.glb"
+        },
+        {
+          "variantIndex": 1,
+          "seed": 1170514302,
+          "file": "PROP_Bucket_v1.glb"
+        },
+        {
+          "variantIndex": 2,
+          "seed": 1170523414,
+          "file": "PROP_Bucket_v2.glb"
+        }
+      ]
+    },
+    {
+      "name": "PROP_PathMarker",
+      "tier": "small",
+      "requiredRadius": 0.35,
+      "areaValue": 0.14,
+      "scoreValue": 2,
+      "variants": [
+        {
+          "variantIndex": 0,
+          "seed": 992455486,
+          "file": "PROP_PathMarker_v0.glb"
+        },
+        {
+          "variantIndex": 1,
+          "seed": 992446694,
+          "file": "PROP_PathMarker_v1.glb"
+        },
+        {
+          "variantIndex": 2,
+          "seed": 992472206,
+          "file": "PROP_PathMarker_v2.glb"
+        }
+      ]
+    },
+    {
+      "name": "PROP_Log",
+      "tier": "medium",
+      "requiredRadius": 0.6,
+      "areaValue": 0.35,
+      "scoreValue": 3,
+      "variants": [
+        {
+          "variantIndex": 0,
+          "seed": 3856881179,
+          "file": "PROP_Log_v0.glb"
+        },
+        {
+          "variantIndex": 1,
+          "seed": 3856889283,
+          "file": "PROP_Log_v1.glb"
+        },
+        {
+          "variantIndex": 2,
+          "seed": 3856863659,
+          "file": "PROP_Log_v2.glb"
+        }
+      ]
+    },
+    {
+      "name": "PROP_Bush",
+      "tier": "medium",
+      "requiredRadius": 0.55,
+      "areaValue": 0.3,
+      "scoreValue": 3,
+      "variants": [
+        {
+          "variantIndex": 0,
+          "seed": 1041493073,
+          "file": "PROP_Bush_v0.glb"
+        },
+        {
+          "variantIndex": 1,
+          "seed": 1041485705,
+          "file": "PROP_Bush_v1.glb"
+        },
+        {
+          "variantIndex": 2,
+          "seed": 1041476577,
+          "file": "PROP_Bush_v2.glb"
+        }
+      ]
+    },
+    {
+      "name": "PROP_ToyCar",
+      "tier": "medium",
+      "requiredRadius": 0.55,
+      "areaValue": 0.3,
+      "scoreValue": 3,
+      "variants": [
+        {
+          "variantIndex": 0,
+          "seed": 539384132,
+          "file": "PROP_ToyCar_v0.glb"
+        },
+        {
+          "variantIndex": 1,
+          "seed": 539392668,
+          "file": "PROP_ToyCar_v1.glb"
+        },
+        {
+          "variantIndex": 2,
+          "seed": 539369204,
+          "file": "PROP_ToyCar_v2.glb"
+        }
+      ]
+    },
+    {
+      "name": "PROP_Scooter",
+      "tier": "medium",
+      "requiredRadius": 0.6,
+      "areaValue": 0.35,
+      "scoreValue": 3,
+      "variants": [
+        {
+          "variantIndex": 0,
+          "seed": 1258754542,
+          "file": "PROP_Scooter_v0.glb"
+        },
+        {
+          "variantIndex": 1,
+          "seed": 1258762806,
+          "file": "PROP_Scooter_v1.glb"
+        },
+        {
+          "variantIndex": 2,
+          "seed": 1258772062,
+          "file": "PROP_Scooter_v2.glb"
+        }
+      ]
+    },
+    {
+      "name": "PROP_SignPost",
+      "tier": "medium",
+      "requiredRadius": 0.7,
+      "areaValue": 0.45,
+      "scoreValue": 4,
+      "variants": [
+        {
+          "variantIndex": 0,
+          "seed": 3615244244,
+          "file": "PROP_SignPost_v0.glb"
+        },
+        {
+          "variantIndex": 1,
+          "seed": 3615235084,
+          "file": "PROP_SignPost_v1.glb"
+        },
+        {
+          "variantIndex": 2,
+          "seed": 3615258724,
+          "file": "PROP_SignPost_v2.glb"
+        }
+      ]
+    },
+    {
+      "name": "PROP_TrashBin",
+      "tier": "medium",
+      "requiredRadius": 0.75,
+      "areaValue": 0.5,
+      "scoreValue": 4,
+      "variants": [
+        {
+          "variantIndex": 0,
+          "seed": 263554020,
+          "file": "PROP_TrashBin_v0.glb"
+        },
+        {
+          "variantIndex": 1,
+          "seed": 263561276,
+          "file": "PROP_TrashBin_v1.glb"
+        },
+        {
+          "variantIndex": 2,
+          "seed": 263570516,
+          "file": "PROP_TrashBin_v2.glb"
+        }
+      ]
+    },
+    {
+      "name": "PROP_ParkBin",
+      "tier": "medium",
+      "requiredRadius": 0.75,
+      "areaValue": 0.5,
+      "scoreValue": 4,
+      "variants": [
+        {
+          "variantIndex": 0,
+          "seed": 2815059278,
+          "file": "PROP_ParkBin_v0.glb"
+        },
+        {
+          "variantIndex": 1,
+          "seed": 2815051414,
+          "file": "PROP_ParkBin_v1.glb"
+        },
+        {
+          "variantIndex": 2,
+          "seed": 2815042302,
+          "file": "PROP_ParkBin_v2.glb"
+        }
+      ]
+    },
+    {
+      "name": "PROP_FenceSegment",
+      "tier": "medium",
+      "requiredRadius": 0.8,
+      "areaValue": 0.55,
+      "scoreValue": 4,
+      "variants": [
+        {
+          "variantIndex": 0,
+          "seed": 363561630,
+          "file": "PROP_FenceSegment_v0.glb"
+        },
+        {
+          "variantIndex": 1,
+          "seed": 363569478,
+          "file": "PROP_FenceSegment_v1.glb"
+        },
+        {
+          "variantIndex": 2,
+          "seed": 363578670,
+          "file": "PROP_FenceSegment_v2.glb"
+        }
+      ]
+    },
+    {
+      "name": "PROP_PicnicBlanket",
+      "tier": "medium",
+      "requiredRadius": 0.85,
+      "areaValue": 0.6,
+      "scoreValue": 4,
+      "variants": [
+        {
+          "variantIndex": 0,
+          "seed": 2386504281,
+          "file": "PROP_PicnicBlanket_v0.glb"
+        },
+        {
+          "variantIndex": 1,
+          "seed": 2386495873,
+          "file": "PROP_PicnicBlanket_v1.glb"
+        },
+        {
+          "variantIndex": 2,
+          "seed": 2386521577,
+          "file": "PROP_PicnicBlanket_v2.glb"
+        }
+      ]
+    },
+    {
+      "name": "PROP_BirdHouse",
+      "tier": "medium",
+      "requiredRadius": 0.85,
+      "areaValue": 0.6,
+      "scoreValue": 4,
+      "variants": [
+        {
+          "variantIndex": 0,
+          "seed": 4248437426,
+          "file": "PROP_BirdHouse_v0.glb"
+        },
+        {
+          "variantIndex": 1,
+          "seed": 4248445290,
+          "file": "PROP_BirdHouse_v1.glb"
+        },
+        {
+          "variantIndex": 2,
+          "seed": 4248454402,
+          "file": "PROP_BirdHouse_v2.glb"
+        }
+      ]
+    },
+    {
+      "name": "PROP_Bench",
+      "tier": "large",
+      "requiredRadius": 1.1,
+      "areaValue": 0.8,
+      "scoreValue": 6,
+      "variants": [
+        {
+          "variantIndex": 0,
+          "seed": 1764855772,
+          "file": "PROP_Bench_v0.glb"
+        },
+        {
+          "variantIndex": 1,
+          "seed": 1764862980,
+          "file": "PROP_Bench_v1.glb"
+        },
+        {
+          "variantIndex": 2,
+          "seed": 1764870252,
+          "file": "PROP_Bench_v2.glb"
+        }
+      ]
+    },
+    {
+      "name": "PROP_PicnicTable",
+      "tier": "large",
+      "requiredRadius": 1.2,
+      "areaValue": 0.95,
+      "scoreValue": 7,
+      "variants": [
+        {
+          "variantIndex": 0,
+          "seed": 1910385826,
+          "file": "PROP_PicnicTable_v0.glb"
+        },
+        {
+          "variantIndex": 1,
+          "seed": 1910378362,
+          "file": "PROP_PicnicTable_v1.glb"
+        },
+        {
+          "variantIndex": 2,
+          "seed": 1910401810,
+          "file": "PROP_PicnicTable_v2.glb"
+        }
+      ]
+    },
+    {
+      "name": "PROP_SwingSet",
+      "tier": "large",
+      "requiredRadius": 1.35,
+      "areaValue": 1.15,
+      "scoreValue": 8,
+      "variants": [
+        {
+          "variantIndex": 0,
+          "seed": 387333948,
+          "file": "PROP_SwingSet_v0.glb"
+        },
+        {
+          "variantIndex": 1,
+          "seed": 387325156,
+          "file": "PROP_SwingSet_v1.glb"
+        },
+        {
+          "variantIndex": 2,
+          "seed": 387348620,
+          "file": "PROP_SwingSet_v2.glb"
+        }
+      ]
+    },
+    {
+      "name": "PROP_Slide",
+      "tier": "large",
+      "requiredRadius": 1.35,
+      "areaValue": 1.15,
+      "scoreValue": 8,
+      "variants": [
+        {
+          "variantIndex": 0,
+          "seed": 3931932600,
+          "file": "PROP_Slide_v0.glb"
+        },
+        {
+          "variantIndex": 1,
+          "seed": 3931939936,
+          "file": "PROP_Slide_v1.glb"
+        },
+        {
+          "variantIndex": 2,
+          "seed": 3931947016,
+          "file": "PROP_Slide_v2.glb"
+        }
+      ]
+    },
+    {
+      "name": "PROP_Fountain",
+      "tier": "large",
+      "requiredRadius": 1.45,
+      "areaValue": 1.3,
+      "scoreValue": 9,
+      "variants": [
+        {
+          "variantIndex": 0,
+          "seed": 1969810993,
+          "file": "PROP_Fountain_v0.glb"
+        },
+        {
+          "variantIndex": 1,
+          "seed": 1969802729,
+          "file": "PROP_Fountain_v1.glb"
+        },
+        {
+          "variantIndex": 2,
+          "seed": 1969793409,
+          "file": "PROP_Fountain_v2.glb"
+        }
+      ]
+    },
+    {
+      "name": "PROP_TreeSmall",
+      "tier": "large",
+      "requiredRadius": 1.25,
+      "areaValue": 1.0,
+      "scoreValue": 7,
+      "variants": [
+        {
+          "variantIndex": 0,
+          "seed": 1764627844,
+          "file": "PROP_TreeSmall_v0.glb"
+        },
+        {
+          "variantIndex": 1,
+          "seed": 1764636252,
+          "file": "PROP_TreeSmall_v1.glb"
+        },
+        {
+          "variantIndex": 2,
+          "seed": 1764643380,
+          "file": "PROP_TreeSmall_v2.glb"
+        }
+      ]
+    },
+    {
+      "name": "PROP_TreeBig",
+      "tier": "large",
+      "requiredRadius": 1.55,
+      "areaValue": 1.55,
+      "scoreValue": 10,
+      "variants": [
+        {
+          "variantIndex": 0,
+          "seed": 452677777,
+          "file": "PROP_TreeBig_v0.glb"
+        },
+        {
+          "variantIndex": 1,
+          "seed": 452686665,
+          "file": "PROP_TreeBig_v1.glb"
+        },
+        {
+          "variantIndex": 2,
+          "seed": 452663073,
+          "file": "PROP_TreeBig_v2.glb"
+        }
+      ]
+    },
+    {
+      "name": "PROP_Hedge",
+      "tier": "large",
+      "requiredRadius": 1.1,
+      "areaValue": 0.8,
+      "scoreValue": 6,
+      "variants": [
+        {
+          "variantIndex": 0,
+          "seed": 1300217875,
+          "file": "PROP_Hedge_v0.glb"
+        },
+        {
+          "variantIndex": 1,
+          "seed": 1300227019,
+          "file": "PROP_Hedge_v1.glb"
+        },
+        {
+          "variantIndex": 2,
+          "seed": 1300203427,
+          "file": "PROP_Hedge_v2.glb"
+        }
+      ]
+    },
+    {
+      "name": "PROP_Sandbox",
+      "tier": "large",
+      "requiredRadius": 1.4,
+      "areaValue": 1.2,
+      "scoreValue": 9,
+      "variants": [
+        {
+          "variantIndex": 0,
+          "seed": 2776273079,
+          "file": "PROP_Sandbox_v0.glb"
+        },
+        {
+          "variantIndex": 1,
+          "seed": 2776281967,
+          "file": "PROP_Sandbox_v1.glb"
+        },
+        {
+          "variantIndex": 2,
+          "seed": 2776291079,
+          "file": "PROP_Sandbox_v2.glb"
+        }
+      ]
+    },
+    {
+      "name": "PROP_Stroller",
+      "tier": "large",
+      "requiredRadius": 1.1,
+      "areaValue": 0.8,
+      "scoreValue": 6,
+      "variants": [
+        {
+          "variantIndex": 0,
+          "seed": 2235220623,
+          "file": "PROP_Stroller_v0.glb"
+        },
+        {
+          "variantIndex": 1,
+          "seed": 2235228503,
+          "file": "PROP_Stroller_v1.glb"
+        },
+        {
+          "variantIndex": 2,
+          "seed": 2235204927,
+          "file": "PROP_Stroller_v2.glb"
+        }
+      ]
+    }
+  ]
+}
